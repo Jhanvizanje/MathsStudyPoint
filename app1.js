@@ -15,10 +15,9 @@ const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rho
 
 
 const app=express();
-let loggedin=false;
 
 app.set('view engine','ejs');
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
 app.use(express.static("public"));
 const conn=mongoose.createConnection("mongodb+srv://Jhanvi:JHZ1707@cluster0-x8ept.mongodb.net/sachinDB",{ useNewUrlParser: true });
 
@@ -61,20 +60,9 @@ const upload = multer({ storage });
 // -------------------------------------------------------- GET-----------------------------------------
 
 
-app.get("/",function(req,res){
-  res.sendFile(__dirname+"/register.html");
-});
-
-// app.get('/uploads', (req, res) => {
-//     if(loggedin===false)
-//     {
-//       res.redirect("/login");
-//     }
-//     else
-//     {
-//       res.render('index');
-//     }
-// })
+app.get('/', (req, res) => {
+    res.render('index');
+})
 
 
 app.get('/files', (req, res) => {
@@ -128,7 +116,7 @@ app.get('/file/:filename', (req, res) => {
 });
 
 
-app.get("/student",function(req,res){
+app.get("/uploads",function(req,res){
   let filesData = [];
   let count = 0;
   gfs.collection('uploads'); // set the collection to look up into
@@ -147,38 +135,10 @@ app.get("/student",function(req,res){
           filesData[count++] = {
               //originalname: file.metadata.originalname,
               filename: file.filename,
-              contentType: file.contentType,
-              id:file._id,
+              contentType: file.contentType
           }
       });
       res.render("uploads",{file:filesData});
-  });
-});
-
-app.get("/tutsachin1707",function(req,res){
-  let filesData = [];
-  let count = 0;
-  gfs.collection('uploads'); // set the collection to look up into
-
-  gfs.files.find({}).toArray((err, files) => {
-      // Error checking
-      if(!files || files.length === 0){
-          return res.status(404).json({
-              responseCode: 1,
-              responseMessage: "error"
-          });
-         // res.send("No files uploaded yet");
-      }
-      // Loop through all the files and fetch the necessary information
-      files.forEach((file) => {
-          filesData[count++] = {
-              //originalname: file.metadata.originalname,
-              filename: file.filename,
-              contentType: file.contentType,
-              id:file._id,
-          }
-      });
-      res.render("uploadsAdmin",{file:filesData});
   });
 });
 
@@ -186,58 +146,9 @@ app.get("/about",function(req,res){
   res.render("about",{aboutContent:aboutContent});
 });
 
-app.get("/aboutAdmin",function(req,res){
-  res.render("aboutAdmin",{aboutContent:aboutContent});
+app.get("/contact",function(req,res){
+  res.render("contact",{contactContent:contactContent});
 });
-
-// app.get("/contact",function(req,res){
-//   res.render("contact",{contactContent:contactContent});
-// });
-
-app.get("/login",function(req,res){
-  res.sendFile(__dirname+"/login.html");
-});
-
-app.get("/uploadsAdmin",function(req,res){
-  res.render("index");
-});
-
-// app.post("/delete/:id",function(req,res)
-// {
-
-//   //sachinDB.uploads.remove();
-
-// //   console.log("in");
-// // gfs.delete(req.params.id,(req,res)=>{
-// //   if(err)
-// //   {
-// //     console.log(err);
-// //   }
-// // })
-// // res.redirect("/uploads");
-
-
-//   gfs.remove({_id:req.params.id,root:'uploads'},function(err,gridStore){
-//     if(err)
-//     {
-//       res.send(err);
-//     }
-//     console.log("deleting");
-//     res.redirect("/uploads");
-//   });
-
-//   // uploads.deleteOne({_id:req.params.id},function(err){
-//   //   if(err)
-//   //   {
-//   //     console.log(err);
-//   //   }
-//   //   else{
-//   //     res.redirect("/uploads");
-//   //   }
-//   // });
-
-//   // sachinDB.uploads.files.remove({_id: req.params.id});
-// });
 
 //-------------------------------------------------------- POST-----------------------------------------
 // @route POST /upload
@@ -245,28 +156,25 @@ app.get("/uploadsAdmin",function(req,res){
 app.post('/upload', upload.single('file'), (req, res) => {
   //res.json({ file: req.file });
   //res.sendFile("/uploads");
-  res.redirect("/tutsachin1707");
+  res.redirect("/uploads");
   });
 
-app.post("/login",function(req,res){
-  console.log(req.body);
-  if(req.body.pwd==="sachin!246")
-  {
-    loggedin=true;
-    res.render("index");
-  }
-  else
-  {
-    res.redirect("/login");
-  }
 
+let port=process.env.PORT;
+if(port == null || port ==""){
+	port=4000;
+}
+
+
+app.listen(port, function() {
+  console.log("Server started ");
 });
-
-
-app.listen(4000,()=>console.log("In port 4000"));
 
 // npm i -g nodemon
 
 //mongodb+srv://Jhanvi:<password>@cluster0-x8ept.mongodb.net/test?retryWrites=true&w=majority
 
 //mongo "mongodb+srv://cluster0-x8ept.mongodb.net/test"  --username Jhanvi
+
+//https://mathsstudypoint.herokuapp.com/
+//https://git.heroku.com/mathsstudypoint.git
