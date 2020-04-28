@@ -1,0 +1,30 @@
+<%-include("partials/header");-%>
+
+<% file.forEach(function(f){ %>
+    <div style="height:40%;width: 40%; ">
+    <% if(f.contentType==="application/vnd.openxmlformats-officedocument.wordprocessingml.document"){ %>
+        <button style="background-color:#1ABC9C"><a href="/file/<%= f.filename %>">
+            <img src="/word.png" alt="wicon" style="height: 50px;width: 50px;">
+             <h4 style="color:black;"><%= f.filename%></h4>
+        </a></button>
+        <!-- <a href="/delete/<%=f.id%>">Delete</a> -->
+        <%}else{%>
+            <button style="background-color:#1ABC9C"><a href="/file/<%= f.filename %>">
+                <img src="/pdfIcon.jpg" alt="icon" style="height: 50px;width: 50px;">
+                <h4 style="color:black;"><%= f.filename%></h4>
+            </a></button>
+            <!-- <a href="/delete/<%=f.id%>">Delete</a> -->
+            <form method="POST" action="/delete/<%= f.id %> ?_method=DELETE">
+                <!-- <button type="submit" >Delete</button> -->
+            </form>
+            <%}%>
+    
+    
+    </div>
+<%});%>
+
+<%-  include("partials/footer"); -%>
+
+
+
+<!-- application/vnd.openxmlformats-officedocument.wordprocessingml.document -->
