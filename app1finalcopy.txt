@@ -8,10 +8,15 @@ const Grid=require("gridfs-stream");
 const methodOverride=require("method-override");
 const crypto = require('crypto');
 const path = require('path');
+const fs=require("fs");
+const http=require("http");
+const _ =require("lodash");
+
+const formidable = require('formidable');
 
 const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
 
-const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
+
 
 
 const app=express();
@@ -31,7 +36,7 @@ conn.once('open', () => {
 })
 
 
-// Create storage engine
+//Create storage engine
 
 const storage = new GridFsStorage({
   url: 'mongodb+srv://Jhanvi:JHZ1707@cluster0-x8ept.mongodb.net/sachinDB',
@@ -93,6 +98,7 @@ app.get('/files', (req, res) => {
 
 
 app.get('/file/:filename', (req, res) => {
+  //----------databse-----------------------------------------------------------------//
   gfs.collection('uploads'); //set collection name to lookup into
 
   /** First check if file exists */
@@ -115,8 +121,33 @@ app.get('/file/:filename', (req, res) => {
   });
 });
 
+//----------databse-----------------------------------------------------------------//
 
-app.get("/student",function(req,res){
+//  const name=__dirname+"/Jhanvi/"+req.params.filename;
+// var fname=req.params.filename;
+// var str2=fname.substring(fname.indexOf(".")+1);
+
+// var contentType;
+// if(_.capitalize(str2)==="Pdf")
+//   contentType="application/pdf";
+// else if(_.capitalize(str2)==="Png")
+//   contentType="image/png";
+// else if(_.capitalize(str2)==="Jpg"|| str2==="Jpeg")
+//   contentType="image/jpg";
+
+//---------------------------------------
+//   fs.readFile(name, function(err, data) {
+//     res.writeHead(200, {'Content-Type': contentType});
+//     res.write(data);
+//     return res.end();
+//   });
+
+// });
+
+
+ app.get("/student",function(req,res){
+//----------databse-----------------------------------------------------------------//
+
   let filesData = [];
   let count = 0;
   gfs.collection('uploads'); // set the collection to look up into
@@ -137,9 +168,46 @@ app.get("/student",function(req,res){
       });
       res.render("uploads",{file:filesData});
   });
-});
+ });
+
+//----------databse-----------------------------------------------------------------//
+
+//   let filesData=[];
+//   let count=0;
+
+//   var folder = __dirname+"/Jhanvi";
+
+//   fs.readdir(folder, (err, files) => {
+//     files.forEach((file) => {
+//       var str2=file.substring(file.indexOf(".")+1);
+
+//       var contentType;
+//       if(_.capitalize(str2)==="Pdf")
+//         content="application/pdf";
+//       else if(_.capitalize(str2)==="Png")
+//         content="image/png";
+//       else if(_.capitalize(str2)==="Jpg"|| str2==="Jpeg")
+//         content="image/jpg"
+
+
+//       filesData[count++] = {
+//           filename: file,
+//           contentType:content  
+//       }
+   
+//   });
+// if(count===0)
+//   res.render("Emptystudent");
+// else  
+//   res.render("uploads",{file:filesData});
+// });
+
+
 
 app.get("/uploadsAdmin",function(req,res){
+
+
+//----------databse-----------------------------------------------------------------//
   let filesData = [];
   let count = 0;
   gfs.collection('uploads'); // set the collection to look up into
@@ -155,12 +223,42 @@ app.get("/uploadsAdmin",function(req,res){
           filesData[count++] = {
               //originalname: file.metadata.originalname,
               filename: file.filename,
-              contentType: file.contentType
+              contentType: file.contentType,
+              id:file._id
           }
       });
       res.render("uploadsAdmin",{file:filesData});
   });
+
 });
+//----------databse-----------------------------------------------------------------//
+
+//   let filesData=[];
+//   let count=0;
+//   var folder = __dirname+"/Jhanvi";
+
+// fs.readdir(folder, (err, files) => {
+//     files.forEach((file) => {
+
+//       var str2=file.substring(file.indexOf(".")+1);
+
+//       var contentType;
+//       if(_.capitalize(str2)==="Pdf")
+//         content="application/pdf";
+//       else if(_.capitalize(str2)==="Png")
+//         content="image/png";
+//       else if(_.capitalize(str2)==="Jpg"|| str2==="Jpeg")
+//         content="image/jpg"
+
+
+//       filesData[count++] = {
+//           filename: file,
+//           contentType:content  
+//       }
+
+
+
+  
 
 
 app.get("/about",function(req,res){
@@ -172,15 +270,36 @@ app.get("/aboutAdmin",function(req,res){
 });
 
 app.get("/tutsachin1707",function(req,res){
-  res.render("index");
+  res.render("index",{errMsg:" "});
 });
 
 app.get("/login",function(req,res){
   res.sendFile(__dirname+"/login.html");
-})
+});
+
+
+app.post("/delete/:id", (req, res) => {
+
+  gfs.remove({ _id: req.params.id, root: "uploads" }, (err, gridStore) => {
+    if (err) {
+      console.log("err:dlt1");
+        return res.status(404).json({ err });
+    }
+    console.log("err:dlt1");
+    res.redirect("/uploadsAdmin");
+  });
+  // gfs.remove({ files_id: req.params.id, root: "uploads" }, (err, gridStore) => {
+  //   if (err) {
+  //     console.log("err:dlt2");
+  //       return res.status(404).json({ err });
+  //   }
+  //   res.redirect("/uploadsAdmin");
+  // });
+});
+
 
 app.post("/login",function(req,res){
-  if(req.body.pwd==="123")
+  if(req.body.pwd==="tutorsachin!246")
   {
     res.redirect("/tutsachin1707");
   }
@@ -188,6 +307,7 @@ app.post("/login",function(req,res){
     res.redirect("/login");
   }
 });
+
 
 //-------------------------------------------------------- POST-----------------------------------------
 // @route POST /upload
@@ -197,6 +317,47 @@ app.post('/upload', upload.single('file'), (req, res) => {
   //res.sendFile("/uploads");
   res.redirect("/uploadsAdmin");
   });
+//   var form = new formidable.IncomingForm();
+//     form.parse(req, function (err, fields, files) {
+//       var oldpath = files.file.path;
+//       var newpath = "C:/Users/azyog/Downloads/Blog-With-Database-final/Blog-With-Database-final/Jhanvi"+ files.file.name;
+//       fs.rename(oldpath, newpath, function (err) {
+//         if (err) throw err;
+//         console.log("done");
+//         res.write('File uploaded and moved!');
+//         res.end();
+//       });
+//     });
+//   console.log(__dirname);
+//   res.redirect("/uploadsAdmin");
+//   });
+
+
+//----------databse-----------------------------------------------------------------//
+// app.post("/upload",function (req, res) {
+  
+//     var form = new formidable.IncomingForm();
+//     form.parse(req, function (err, fields, files) {
+//       var oldpath = files.file.path;
+//       console.log(oldpath);
+//   var folder =__dirname+"/Jhanvi";
+
+//     fs.readdir(folder, (err, file2) => {
+//        if(file2.includes(files.file.name))
+//        {
+//         res.render("index",{errMsg:"*File name already exists!Try changing name."})
+ 
+//        }
+//       });
+//       var newpath = __dirname+"/Jhanvi/" + files.file.name;
+//       fs.rename(oldpath, newpath, function (err) {
+//         if (err) throw err;
+//         console.log("done");
+//         res.redirect("/uploadsAdmin");
+//       });
+//     })
+// });
+ 
 
 
 let port=process.env.PORT;
@@ -209,3 +370,12 @@ app.listen(port, function() {
   console.log("Server started ");
 });
 
+// npm i -g nodemon
+
+//mongodb+srv://Jhanvi:<password>@cluster0-x8ept.mongodb.net/test?retryWrites=true&w=majority
+
+//mongo "mongodb+srv://cluster0-x8ept.mongodb.net/test"  --username Jhanvi
+
+//https://mathsstudypoint.herokuapp.com/
+//https://git.heroku.com/mathsstudypoint.git
+// https://mathsstudypoint.herokuapp.com/

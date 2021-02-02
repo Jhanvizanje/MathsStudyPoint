@@ -1,7 +1,7 @@
 <%-include("partials/headerAdmin");-%>
 
 <% file.forEach(function(f){ %>
-    <div style="height:40%;width: 40%;float:left; ">
+    <div style="height:40%;width: 40%;">
     <% if(f.contentType==="application/vnd.openxmlformats-officedocument.wordprocessingml.document"){ %>
         <button style="background-color:#1ABC9C"><a href="/file/<%= f.filename %>">
             <img src="/word.png" alt="wicon" style="height: 50px;width: 50px;">
